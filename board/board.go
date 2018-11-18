@@ -1,6 +1,7 @@
 package board
 
 import (
+	"checkers-go/constants"
 	"fmt"
 	"strings"
 )
@@ -11,14 +12,6 @@ var (
 	BLACK          = "b"
 	WHITE_PROMOTED = "W"
 	BLACK_PROMOTED = "B"
-
-	WHITE_PLAYER = 0
-	BLACK_PLAYER = 1
-
-	UPLEFT    = 0
-	UPRIGHT   = 1
-	DOWNLEFT  = 2
-	DOWNRIGHT = 3
 )
 
 type Board struct {
@@ -43,7 +36,7 @@ func NewBoardWithState(state [8][8]string) *Board {
 	return &Board{grid: state}
 }
 
-func (b *Board) MakeMove(pieceRowIdx int, pieceColIdx int, move int) *Board {
+func (b *Board) MakeMove(pieceRowIdx int, pieceColIdx int, move constants.Move) *Board {
 	if !b.isMoveLegal(pieceRowIdx, pieceColIdx, move, true) {
 		fmt.Println("MOVE IS ILLEGAL")
 		return b
@@ -111,30 +104,30 @@ func (b *Board) makeKnightPiece(rowIdx int, colIdx int, move int) {
 	}
 }
 
-func (b *Board) nextPossibleMoves(playersTurn int) [][]int {
+func (b *Board) nextPossibleMoves(playersTurn constants.Player) []constants.PossibleMove {
 	piece := "w"
-	if playersTurn == BLACK_PLAYER {
+	if playersTurn == constants.BLACK_PLAYER {
 		piece = "b"
 	}
 
-	moves := make([][]int, 0)
+	moves := make([]constants.PossibleMove, 0)
 	for rIdx := 0; rIdx <= 7; rIdx++ {
 		for cIdx := 0; cIdx <= 7; cIdx++ {
 			if strings.ToLower(b.grid[rIdx][cIdx]) != piece {
 				continue
 			}
 
-			if b.isMoveLegal(rIdx, cIdx, UPLEFT, true) {
-				moves = append(moves, []int{rIdx, cIdx, UPLEFT})
+			if b.isMoveLegal(rIdx, cIdx, constants.UPLEFT, true) {
+				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.UPLEFT))
 			}
-			if b.isMoveLegal(rIdx, cIdx, UPRIGHT, true) {
-				moves = append(moves, []int{rIdx, cIdx, UPRIGHT})
+			if b.isMoveLegal(rIdx, cIdx, constants.UPRIGHT, true) {
+				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.UPRIGHT))
 			}
-			if b.isMoveLegal(rIdx, cIdx, DOWNLEFT, true) {
-				moves = append(moves, []int{rIdx, cIdx, DOWNLEFT})
+			if b.isMoveLegal(rIdx, cIdx, constants.DOWNLEFT, true) {
+				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.DOWNLEFT))
 			}
-			if b.isMoveLegal(rIdx, cIdx, DOWNRIGHT, true) {
-				moves = append(moves, []int{rIdx, cIdx, DOWNRIGHT})
+			if b.isMoveLegal(rIdx, cIdx, constants.DOWNRIGHT, true) {
+				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.DOWNRIGHT))
 			}
 		}
 	}
@@ -164,34 +157,34 @@ func (b *Board) nextPossibleMoves(playersTurn int) [][]int {
   return pieces
 }*/
 
-func (b *Board) isMoveLegal(pieceRowIdx int, pieceColIdx int, move int, recursiveCheck bool) bool {
+func (b *Board) isMoveLegal(pieceRowIdx int, pieceColIdx int, move constants.Move, recursiveCheck bool) bool {
 	piece := b.grid[pieceRowIdx][pieceColIdx]
 	if piece == EMPTY {
 		return false
 	}
 
-	if piece == WHITE && (move == UPLEFT || move == UPRIGHT) {
+	if piece == WHITE && (move == constants.UPLEFT || move == constants.UPRIGHT) {
 		return false
 	}
 
-	if piece == WHITE && (move == DOWNLEFT || move == DOWNRIGHT) {
+	if piece == WHITE && (move == constants.DOWNLEFT || move == constants.DOWNRIGHT) {
 		return false
 	}
 
 	// -1, -1 == UPPER_LEFT
-	if move == UPLEFT && (pieceRowIdx <= 0 || pieceColIdx <= 0) {
+	if move == constants.UPLEFT && (pieceRowIdx <= 0 || pieceColIdx <= 0) {
 		return false
 	}
 
-	if move == UPRIGHT && (pieceRowIdx <= 0 || pieceColIdx >= 7) {
+	if move == constants.UPRIGHT && (pieceRowIdx <= 0 || pieceColIdx >= 7) {
 		return false
 	}
 
-	if move == DOWNLEFT && (pieceRowIdx >= 7 || pieceColIdx <= 0) {
+	if move == constants.DOWNLEFT && (pieceRowIdx >= 7 || pieceColIdx <= 0) {
 		return false
 	}
 
-	if move == DOWNRIGHT && (pieceRowIdx >= 7 || pieceColIdx >= 7) {
+	if move == constants.DOWNRIGHT && (pieceRowIdx >= 7 || pieceColIdx >= 7) {
 		return false
 	}
 
