@@ -7,6 +7,14 @@ const (
 	BLACK_PLAYER        = 1
 )
 
+func opponent(p Player) Player {
+	if p == WHITE_PLAYER {
+		return BLACK_PLAYER
+	}
+
+	return WHITE_PLAYER
+}
+
 type Move int
 
 const (

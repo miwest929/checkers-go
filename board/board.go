@@ -135,27 +135,92 @@ func (b *Board) nextPossibleMoves(playersTurn constants.Player) []constants.Poss
 	return moves
 }
 
-/*func (b *Board) getPieces() map[string][][]int {
-  pieces := make(map[string][][]int)
-  pieces["white"] = make([][]int, 0)
-  pieces["black"] = make([][]int, 0)
+func (b *Board) getPieces() map[string]map[string][][]int {
+	pieces := make(map[string]map[string][][]int)
+	pieces["white"] = make(map[string][][]int)
+	pieces["white"]["normal"] = make([][]int, 0)
+	pieces["white"]["king"] = make([][]int, 0)
+	pieces["black"] = make(map[string][][]int)
+	pieces["black"]["normal"] = make([][]int, 0)
+	pieces["black"]["king"] = make([][]int, 0)
 
-  for rIdx := 0; rIdx <= 7; rIdx++ {
-    for cIdx := 0; cIdx <= 7; cIdx++ {
-      if b.grid[rIdx][cIdx] == 'w' {
-        pieces[]
-      }
-      if b.grid[rIdx][cIdx] == 'W' {
-      }
-      if b.grid[rIdx][cIdx] == 'b' {
-      }
-      if b.grid[rIdx][cIdx] == 'B' {
-      }
-    }
-  }
+	for rIdx := 0; rIdx <= 7; rIdx++ {
+		for cIdx := 0; cIdx <= 7; cIdx++ {
+			if b.grid[rIdx][cIdx] == "w" {
+				pieces["white"]["normal"] = append(pieces["white"]["normal"], []int{rIdx, cIdx})
+			}
+			if b.grid[rIdx][cIdx] == "W" {
+				pieces["white"]["king"] = append(pieces["white"]["king"], []int{rIdx, cIdx})
+			}
+			if b.grid[rIdx][cIdx] == "b" {
+				pieces["black"]["normal"] = append(pieces["black"]["normal"], []int{rIdx, cIdx})
+			}
+			if b.grid[rIdx][cIdx] == "B" {
+				pieces["black"]["king"] = append(pieces["black"]["king"], []int{rIdx, cIdx})
+			}
+		}
+	}
 
-  return pieces
-}*/
+	return pieces
+}
+
+func (b *Board) CalculateScore() int {
+	piecesScore := b.getTotalPiecesScore()
+
+	totalScore := piecesScore * 100
+	return totalScore + b.whosePiecesAreCloserToKings()
+}
+
+func (b *Board) whosePiecesAreCloserToKings() int {
+	pieces := b.getPieces()
+
+	whiteScoreSum := 0
+	for _, piece := range pieces["white"]["normal"] {
+		whiteScoreSum += b.distanceFromBeingKnighted(piece)
+	}
+
+	blackScoreSum := 0
+	for _, piece := range pieces["black"]["normal"] {
+		blackScoreSum += b.distanceFromBeingKnighted(piece)
+	}
+
+	max_score := 84 // all 12 pieces are 7 moves away from being knighted
+	return (max_score - blackScoreSum) - (max_score - whiteScoreSum)
+}
+
+func (b *Board) distanceFromBeingKnighted(piece []int) int {
+	rowIdx := piece[0]
+	colIdx := piece[1]
+
+	if b.grid[rowIdx][colIdx] == "w" || b.grid[rowIdx][colIdx] == "W" {
+		return 7 - rowIdx
+	}
+
+	if b.grid[rowIdx][colIdx] == "b" || b.grid[rowIdx][colIdx] == "B" {
+		return rowIdx
+	}
+
+	return 8 // the max distance
+}
+
+func (b *Board) getTotalPiecesScore() int {
+	totalScore := 0
+	for _, row := range b.grid {
+		for _, cell := range row {
+			if cell == "b" {
+				totalScore -= 1
+			} else if cell == "B" {
+				totalScore -= 5
+			} else if cell == "w" {
+				totalScore += 1
+			} else if cell == "W" {
+				totalScore += 5
+			}
+		}
+	}
+
+	return totalScore
+}
 
 func (b *Board) isMoveLegal(pieceRowIdx int, pieceColIdx int, move constants.Move, recursiveCheck bool) bool {
 	piece := b.grid[pieceRowIdx][pieceColIdx]
@@ -163,7 +228,7 @@ func (b *Board) isMoveLegal(pieceRowIdx int, pieceColIdx int, move constants.Mov
 		return false
 	}
 
-	if piece == WHITE && (move == constants.UPLEFT || move == constants.UPRIGHT) {
+	if piece == BLACK && (move == constants.UPLEFT || move == constants.UPRIGHT) {
 		return false
 	}
 
