@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"checkers-go/board"
 	"checkers-go/constants"
-	//	"checkers-go/player"
+	"checkers-go/player"
 	"fmt"
 	"os"
 	"strconv"
@@ -30,8 +30,8 @@ func (game *CheckersGame) Start() {
 		game.currBoard = game.currBoard.MakeMove(rIdx, cIdx, move)
 
 		// computer's move
-		nextMove := ai.NextMove(&game.currBoard)
-		game.currBoard = game.currBoard.MakeMove(ri, ci, nextMove)
+		nextMove := ai.NextMove(game.currBoard)
+		game.currBoard = game.currBoard.MakeMove(nextMove.RowIdx, nextMove.ColIdx, nextMove.M)
 	}
 }
 

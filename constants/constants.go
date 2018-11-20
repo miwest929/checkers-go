@@ -7,7 +7,7 @@ const (
 	BLACK_PLAYER        = 1
 )
 
-func opponent(p Player) Player {
+func Opponent(p Player) Player {
 	if p == WHITE_PLAYER {
 		return BLACK_PLAYER
 	}

@@ -104,7 +104,7 @@ func (b *Board) makeKnightPiece(rowIdx int, colIdx int, move int) {
 	}
 }
 
-func (b *Board) nextPossibleMoves(playersTurn constants.Player) []constants.PossibleMove {
+func (b *Board) NextPossibleMoves(playersTurn constants.Player) []constants.PossibleMove {
 	piece := "w"
 	if playersTurn == constants.BLACK_PLAYER {
 		piece = "b"
