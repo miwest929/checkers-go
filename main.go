@@ -24,8 +24,18 @@ func (game *CheckersGame) Start() {
 
 	for {
 		fmt.Println(game.currBoard)
-		rIdx, cIdx, move := game.GetHumanInput()
 
+		isHumanMoveLegal := false
+		var rIdx int
+		var cIdx int
+		var move constants.Move
+		for !isHumanMoveLegal {
+			rIdx, cIdx, move = game.GetHumanInput()
+			isHumanMoveLegal = game.currBoard.IsMoveLegal(rIdx, cIdx, move)
+			if !isHumanMoveLegal {
+				fmt.Println("Your chosen move is illegal. Please choose another one.")
+			}
+		}
 		// human's move
 		game.currBoard = game.currBoard.MakeMove(rIdx, cIdx, move)
 

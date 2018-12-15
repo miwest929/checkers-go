@@ -2,7 +2,7 @@ package board
 
 import (
 	"checkers-go/constants"
-	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -37,8 +37,7 @@ func NewBoardWithState(state [8][8]string) *Board {
 }
 
 func (b *Board) MakeMove(pieceRowIdx int, pieceColIdx int, move constants.Move) *Board {
-	if !b.isMoveLegal(pieceRowIdx, pieceColIdx, move, true) {
-		fmt.Println("MOVE IS ILLEGAL")
+	if !b.IsMoveLegal(pieceRowIdx, pieceColIdx, move) {
 		return b
 	}
 
@@ -62,6 +61,8 @@ func (b *Board) MakeMove(pieceRowIdx int, pieceColIdx int, move constants.Move) 
 		newState[newRowIdx][newColIdx] = EMPTY
 		newState[pieceRowIdx][pieceColIdx] = EMPTY
 
+		// if nextRowIdx
+
 		newBoard := NewBoardWithState(newState)
 		//newBoard.makeKnightPiece(nextRowIdx, nextColIdx)
 		return newBoard
@@ -82,10 +83,11 @@ func (b *Board) Clone() [8][8]string {
 }
 
 func (b *Board) String() string {
-	str := " _ _ _ _ _ _ _ _\n"
-	for _, row := range b.grid {
+	str := "   0 1 2 3 4 5 6 7\n"
+	str += "   _ _ _ _ _ _ _ _\n"
+	for rIdx, row := range b.grid {
 		rowStr := strings.Join(row[:], "|")
-		rowStr = "|" + rowStr + "|"
+		rowStr = strconv.Itoa(rIdx) + " |" + rowStr + "|"
 		str += rowStr + "\n"
 	}
 
@@ -117,16 +119,16 @@ func (b *Board) NextPossibleMoves(playersTurn constants.Player) []constants.Poss
 				continue
 			}
 
-			if b.isMoveLegal(rIdx, cIdx, constants.UPLEFT, true) {
+			if b.IsMoveLegal(rIdx, cIdx, constants.UPLEFT) {
 				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.UPLEFT))
 			}
-			if b.isMoveLegal(rIdx, cIdx, constants.UPRIGHT, true) {
+			if b.IsMoveLegal(rIdx, cIdx, constants.UPRIGHT) {
 				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.UPRIGHT))
 			}
-			if b.isMoveLegal(rIdx, cIdx, constants.DOWNLEFT, true) {
+			if b.IsMoveLegal(rIdx, cIdx, constants.DOWNLEFT) {
 				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.DOWNLEFT))
 			}
-			if b.isMoveLegal(rIdx, cIdx, constants.DOWNRIGHT, true) {
+			if b.IsMoveLegal(rIdx, cIdx, constants.DOWNRIGHT) {
 				moves = append(moves, constants.NewPossibleMove(rIdx, cIdx, constants.DOWNRIGHT))
 			}
 		}
@@ -222,7 +224,7 @@ func (b *Board) getTotalPiecesScore() int {
 	return totalScore
 }
 
-func (b *Board) isMoveLegal(pieceRowIdx int, pieceColIdx int, move constants.Move, recursiveCheck bool) bool {
+func (b *Board) IsMoveLegal(pieceRowIdx int, pieceColIdx int, move constants.Move) bool {
 	piece := b.grid[pieceRowIdx][pieceColIdx]
 	if piece == EMPTY {
 		return false

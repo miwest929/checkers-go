@@ -6,6 +6,7 @@ import (
 	"checkers-go/queue"
 	stree "checkers-go/statetree"
 	"fmt"
+	"time"
 )
 
 type ComputerPlayer struct {
@@ -34,33 +35,34 @@ func (cp *ComputerPlayer) constructStateTree(levelsCount int, board *brd.Board) 
 		}
 	}
 
-	fmt.Printf("Generated %d states", numberOfStates)
+	fmt.Printf("Generated %d states\n", numberOfStates)
 
 	return tree
 }
 
-func (cp *ComputerPlayer) minimax(node *stree.Node, isMax bool) int {
+type MinimaxFn func([]int) int
+
+func (cp *ComputerPlayer) minimaxMax(node *stree.Node) int {
+	return cp.minimax(node, GetMax, GetMin)
+}
+
+func (cp *ComputerPlayer) minimaxMin(node *stree.Node) int {
+	return cp.minimax(node, GetMin, GetMax)
+}
+
+func (cp *ComputerPlayer) minimax(node *stree.Node, deciderFn MinimaxFn, opponentDecider MinimaxFn) int {
 	if len(node.Children) == 0 {
 		node.Score = node.B.CalculateScore()
 		return node.Score
 	}
 
 	scores := make([]int, 0)
-	if isMax {
-		for _, child := range node.Children {
-			scores = append(scores, cp.minimax(child, false))
-		}
-
-		node.Score = GetMax(scores)
-		return node.Score
-	} else {
-		for _, child := range node.Children {
-			scores = append(scores, cp.minimax(child, true))
-		}
-
-		node.Score = GetMin(scores)
-		return node.Score
+	for _, child := range node.Children {
+		scores = append(scores, cp.minimax(child, opponentDecider, deciderFn))
 	}
+
+	node.Score = deciderFn(scores)
+	return node.Score
 }
 
 func GetMax(scores []int) int {
@@ -86,8 +88,12 @@ func GetMin(scores []int) int {
 }
 
 func (cp *ComputerPlayer) NextMove(board *brd.Board) *constants.PossibleMove {
-	stateTree := cp.constructStateTree(6, board)
-	bestScore := cp.minimax(stateTree.Root, true)
+	startTime := time.Now()
+	stateTree := cp.constructStateTree(7, board)
+	fmt.Println(time.Since(startTime))
+	startTime = time.Now()
+	bestScore := cp.minimaxMax(stateTree.Root)
+	fmt.Println(time.Since(startTime))
 
 	for _, child := range stateTree.Root.Children {
 		if child.Score == bestScore {
