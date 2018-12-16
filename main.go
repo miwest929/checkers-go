@@ -45,37 +45,33 @@ func (game *CheckersGame) Start() {
 	}
 }
 
-func (game *CheckersGame) GetHumanInput() (int, int, constants.Move) {
-	reader := bufio.NewReader(os.Stdin)
+func (game *CheckersGame) promptHumanChoice(prompt string) string {
+	fmt.Print(prompt + " -> ")
 
-	fmt.Print("Piece Row Index (0-7) -> ")
+	reader := bufio.NewReader(os.Stdin)
 	inpt, err := reader.ReadString('\n')
+	inpt = strings.TrimSuffix(inpt, "\n")
 	if err != nil {
 		fmt.Println(err)
 	}
-	inpt = strings.TrimSuffix(inpt, "\n")
+
+	return inpt
+}
+
+func (game *CheckersGame) GetHumanInput() (int, int, constants.Move) {
+	inpt := game.promptHumanChoice("Piece Row Index (0-7)")
 	rIdx, cnvErr := strconv.Atoi(inpt)
 	if cnvErr != nil {
 		fmt.Println(cnvErr)
 	}
 
-	fmt.Print("Piece Col Index (0-7) -> ")
-	inpt, err = reader.ReadString('\n')
-	inpt = strings.TrimSuffix(inpt, "\n")
-	if err != nil {
-		fmt.Println(err)
-	}
+	inpt = game.promptHumanChoice("Piece Col Index (0-7)")
 	cIdx, cnvErr := strconv.Atoi(inpt)
 	if cnvErr != nil {
 		fmt.Println(cnvErr)
 	}
 
-	fmt.Print("Move (UL=0, UR=1, DL=2, DR=3) -> ")
-	inpt, err = reader.ReadString('\n')
-	inpt = strings.TrimSuffix(inpt, "\n")
-	if err != nil {
-		fmt.Println(err)
-	}
+	inpt = game.promptHumanChoice("Move (UL=0, UR=1, DL=2, DR=3)")
 	mv, cnvErr := strconv.Atoi(inpt)
 	if cnvErr != nil {
 		fmt.Println(cnvErr)
