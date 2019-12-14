@@ -101,7 +101,7 @@ func (b *Board) Clone() [8][8]string {
 }
 
 func (b *Board) Display() {
-	color.Red.Printf("   0 1 2 3 4 5 6 7\n")
+	color.Red.Printf("\n   0 1 2 3 4 5 6 7\n")
 	color.Style{color.FgWhite, color.OpBold}.Printf("   _ _ _ _ _ _ _ _\n")
 	for rIdx, row := range b.grid {
 		color.Red.Printf(strconv.Itoa(rIdx))
@@ -126,6 +126,7 @@ func (b *Board) Display() {
 		}
 		color.White.Printf("\n")
 	}
+	color.White.Printf("   - - - - - - - -\n")
 }
 
 func (b *Board) String() string {
@@ -212,11 +213,11 @@ func (b *Board) getPieces() map[string]map[string][][]int {
 	return pieces
 }
 
-func (b *Board) CalculateScore() int {
+func (b *Board) CalculateScore() float64 {
 	piecesScore := b.getTotalPiecesScore()
-
 	totalScore := piecesScore * 100
-	return totalScore + b.whosePiecesAreCloserToKings()
+
+	return float64(totalScore + b.whosePiecesAreCloserToKings())
 }
 
 func (b *Board) whosePiecesAreCloserToKings() int {

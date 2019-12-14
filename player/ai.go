@@ -6,6 +6,7 @@ import (
 	"checkers-go/queue"
 	stree "checkers-go/statetree"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -40,58 +41,47 @@ func (cp *ComputerPlayer) constructStateTree(levelsCount int, board *brd.Board) 
 	return tree
 }
 
-func (cp *ComputerPlayer) minimaxMax(node *stree.Node) int {
-	return cp.minimax(node, true)
+func (cp *ComputerPlayer) minimaxMax(node *stree.Node) float64 {
+	return cp.minimax(node, true, math.Inf(-1), math.Inf(1))
 }
 
-func (cp *ComputerPlayer) minimaxMin(node *stree.Node) int {
-	return cp.minimax(node, false)
+func (cp *ComputerPlayer) minimaxMin(node *stree.Node) float64 {
+	return cp.minimax(node, false, math.Inf(1), math.Inf(-1))
 }
 
-func (cp *ComputerPlayer) minimax(node *stree.Node, isMaximizing bool) int {
+func (cp *ComputerPlayer) minimax(node *stree.Node, isMaximizing bool, alpha float64, beta float64) float64 {
 	if len(node.Children) == 0 {
-		node.Score = node.B.CalculateScore()
-		return node.Score
-	}
-
-	scores := make([]int, 0)
-	for _, child := range node.Children {
-		if isMaximizing {
-			scores = append(scores, cp.minimaxMin(child))
-		} else {
-			scores = append(scores, cp.minimaxMax(child))
-		}
+		node.Score = int(node.B.CalculateScore())
+		return float64(node.Score)
 	}
 
 	if isMaximizing {
-		node.Score = GetMax(scores)
+		bestValue := math.Inf(-1)
+		for _, child := range node.Children {
+			value := cp.minimax(child, false, alpha, beta)
+			bestValue = math.Max(value, bestValue)
+			alpha = math.Max(alpha, bestValue)
+			if beta <= alpha {
+				break
+			}
+		}
+		node.Score = int(bestValue)
+		return bestValue
 	} else {
-		node.Score = GetMin(scores)
-	}
-
-	return node.Score
-}
-
-func GetMax(scores []int) int {
-	maxValue := scores[0]
-	for _, value := range scores[1:] {
-		if value > maxValue {
-			maxValue = value
+		bestValue := math.Inf(1)
+		for _, child := range node.Children {
+			value := cp.minimax(child, true, alpha, beta)
+			bestValue = math.Min(value, bestValue)
+			beta = math.Min(beta, bestValue)
+			if beta <= alpha {
+				break
+			}
 		}
+		node.Score = int(bestValue)
+		return bestValue
 	}
 
-	return maxValue
-}
-
-func GetMin(scores []int) int {
-	minValue := scores[0]
-	for _, value := range scores[1:] {
-		if value < minValue {
-			minValue = value
-		}
-	}
-
-	return minValue
+	return float64(node.Score)
 }
 
 func (cp *ComputerPlayer) NextMove(board *brd.Board) *constants.PossibleMove {
@@ -99,11 +89,11 @@ func (cp *ComputerPlayer) NextMove(board *brd.Board) *constants.PossibleMove {
 	stateTree := cp.constructStateTree(7, board)
 	fmt.Println(time.Since(startTime))
 	startTime = time.Now()
-	bestScore := cp.minimaxMax(stateTree.Root)
+	bestScore := cp.minimax(stateTree.Root, true, math.Inf(-1), math.Inf(1))
 	fmt.Println(time.Since(startTime))
 
 	for _, child := range stateTree.Root.Children {
-		if child.Score == bestScore {
+		if child.Score == int(bestScore) {
 			return child.M
 		}
 	}
