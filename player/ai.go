@@ -29,7 +29,7 @@ func (cp *ComputerPlayer) constructStateTree(levelsCount int, board *brd.Board) 
 		for _, move := range nextMoves {
 			nextBoard := state.B.MakeMove(move.RowIdx, move.ColIdx, move.M)
 			nextState := stree.NewNode(nextBoard, constants.Opponent(state.P), state.Level+1, &move)
-			numberOfStates += 1
+			numberOfStates++
 			state.Children = append(state.Children, nextState)
 			q.Enqueue(nextState)
 		}
@@ -40,17 +40,15 @@ func (cp *ComputerPlayer) constructStateTree(levelsCount int, board *brd.Board) 
 	return tree
 }
 
-type MinimaxFn func([]int) int
-
 func (cp *ComputerPlayer) minimaxMax(node *stree.Node) int {
-	return cp.minimax(node, GetMax, GetMin)
+	return cp.minimax(node, true)
 }
 
 func (cp *ComputerPlayer) minimaxMin(node *stree.Node) int {
-	return cp.minimax(node, GetMin, GetMax)
+	return cp.minimax(node, false)
 }
 
-func (cp *ComputerPlayer) minimax(node *stree.Node, deciderFn MinimaxFn, opponentDecider MinimaxFn) int {
+func (cp *ComputerPlayer) minimax(node *stree.Node, isMaximizing bool) int {
 	if len(node.Children) == 0 {
 		node.Score = node.B.CalculateScore()
 		return node.Score
@@ -58,10 +56,19 @@ func (cp *ComputerPlayer) minimax(node *stree.Node, deciderFn MinimaxFn, opponen
 
 	scores := make([]int, 0)
 	for _, child := range node.Children {
-		scores = append(scores, cp.minimax(child, opponentDecider, deciderFn))
+		if isMaximizing {
+			scores = append(scores, cp.minimaxMin(child))
+		} else {
+			scores = append(scores, cp.minimaxMax(child))
+		}
 	}
 
-	node.Score = deciderFn(scores)
+	if isMaximizing {
+		node.Score = GetMax(scores)
+	} else {
+		node.Score = GetMin(scores)
+	}
+
 	return node.Score
 }
 
