@@ -4,6 +4,8 @@ import (
 	"checkers-go/constants"
 	"strconv"
 	"strings"
+
+	"github.com/gookit/color"
 )
 
 var (
@@ -14,8 +16,14 @@ var (
 	BLACK_PROMOTED = "B"
 )
 
+const NO_LAST_INDEX = -1
+
 type Board struct {
-	grid [8][8]string
+	grid         [8][8]string
+	LastWhiteRow int
+	LastWhiteCol int
+	LastBlackRow int
+	LastBlackCol int
 }
 
 func getMoveVectors() [4][2]int {
@@ -27,13 +35,25 @@ func getMoveVectors() [4][2]int {
 	return [4][2]int{upperLeft, upperRight, downLeft, downRight}
 }
 
+// NextPiecePos computes the next row,col of piece after applying given move
+func NextPiecePos(rowIdx int, colIdx int, move constants.Move) [2]int {
+	moveVectors := getMoveVectors()
+	return [2]int{rowIdx + moveVectors[move][0], colIdx + moveVectors[move][1]}
+}
+
 // Naming conventions: board -> refers to type Board. grid is the data structure that houses the pieces.
 func NewBoard() *Board {
 	return &Board{grid: initialGrid()}
 }
 
 func NewBoardWithState(state [8][8]string) *Board {
-	return &Board{grid: state}
+	return &Board{
+		grid:         state,
+		LastWhiteRow: NO_LAST_INDEX,
+		LastWhiteCol: NO_LAST_INDEX,
+		LastBlackRow: NO_LAST_INDEX,
+		LastBlackCol: NO_LAST_INDEX,
+	}
 }
 
 func (b *Board) MakeMove(pieceRowIdx int, pieceColIdx int, move constants.Move) *Board {
@@ -50,21 +70,19 @@ func (b *Board) MakeMove(pieceRowIdx int, pieceColIdx int, move constants.Move) 
 		newState[newRowIdx][newColIdx] = b.grid[pieceRowIdx][pieceColIdx]
 		newState[pieceRowIdx][pieceColIdx] = EMPTY
 		newBoard := NewBoardWithState(newState)
-		//newBoard.makeKnightPiece(newRowIdx, newColIdx)
 		return newBoard
 	}
 
 	nextRowIdx := newRowIdx + moveVectors[move][0]
 	nextColIdx := newColIdx + moveVectors[move][1]
+	pieceColor := b.grid[pieceRowIdx][pieceColIdx]
 	if b.grid[nextRowIdx][nextColIdx] == EMPTY {
-		newState[nextRowIdx][nextColIdx] = b.grid[pieceRowIdx][pieceColIdx]
+		newState[nextRowIdx][nextColIdx] = pieceColor
 		newState[newRowIdx][newColIdx] = EMPTY
 		newState[pieceRowIdx][pieceColIdx] = EMPTY
 
-		// if nextRowIdx
-
 		newBoard := NewBoardWithState(newState)
-		//newBoard.makeKnightPiece(nextRowIdx, nextColIdx)
+
 		return newBoard
 	}
 
@@ -80,6 +98,34 @@ func (b *Board) Clone() [8][8]string {
 	}
 
 	return grid
+}
+
+func (b *Board) Display() {
+	color.Red.Printf("   0 1 2 3 4 5 6 7\n")
+	color.Style{color.FgWhite, color.OpBold}.Printf("   _ _ _ _ _ _ _ _\n")
+	for rIdx, row := range b.grid {
+		color.Red.Printf(strconv.Itoa(rIdx))
+		color.Style{color.FgWhite, color.OpBold}.Printf(" |")
+		for cIdx, cell := range row {
+			if cell == "w" {
+				if b.LastWhiteCol == rIdx && b.LastWhiteRow == cIdx {
+					color.Style{color.FgMagenta, color.OpBold}.Printf(cell)
+				} else {
+					color.Style{color.FgMagenta}.Printf(cell)
+				}
+			} else if cell == "b" {
+				if b.LastBlackCol == cIdx && b.LastBlackRow == rIdx {
+					color.Style{color.FgCyan, color.OpBold}.Printf(cell)
+				} else {
+					color.Style{color.FgCyan}.Printf(cell)
+				}
+			} else {
+				color.Style{color.FgCyan, color.OpBold}.Printf(" ")
+			}
+			color.Style{color.FgWhite, color.OpBold}.Printf("|")
+		}
+		color.White.Printf("\n")
+	}
 }
 
 func (b *Board) String() string {

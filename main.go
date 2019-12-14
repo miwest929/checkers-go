@@ -9,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/gookit/color"
 )
 
 type CheckersGame struct {
@@ -23,7 +25,7 @@ func (game *CheckersGame) Start() {
 	ai := player.ComputerPlayer{}
 
 	for {
-		fmt.Println(game.currBoard)
+		game.currBoard.Display()
 
 		var rIdx int
 		var cIdx int
@@ -39,15 +41,26 @@ func (game *CheckersGame) Start() {
 		}
 		// human's move
 		game.currBoard = game.currBoard.MakeMove(rIdx, cIdx, move)
+		nextPos := board.NextPiecePos(rIdx, cIdx, move)
+		// TODO: LastWhiteRow/Col is not causing last moved piece to be bolded
+		game.currBoard.LastWhiteRow = nextPos[0]
+		game.currBoard.LastWhiteCol = nextPos[1]
 
 		// computer's move
 		nextMove := ai.NextMove(game.currBoard)
 		game.currBoard = game.currBoard.MakeMove(nextMove.RowIdx, nextMove.ColIdx, nextMove.M)
+		nextPos = board.NextPiecePos(nextMove.RowIdx, nextMove.ColIdx, nextMove.M)
+		// TODO: LastBlackRow/Col is not causing last moved piece to be bolded
+		game.currBoard.LastBlackRow = nextMove.RowIdx
+		game.currBoard.LastBlackCol = nextMove.ColIdx
 	}
 }
 
 func (game *CheckersGame) promptHumanChoice(prompt string) string {
-	fmt.Print(prompt + " -> ")
+	//color.Cyan.Printf("%s ->", prompt)
+	color.Style{color.FgWhite, color.OpBold}.Printf("%s ", prompt)
+	color.Style{color.FgCyan, color.OpBold}.Printf("-> ")
+	//fmt.Print(prompt + " -> ")
 
 	reader := bufio.NewReader(os.Stdin)
 	inpt, err := reader.ReadString('\n')
@@ -60,14 +73,18 @@ func (game *CheckersGame) promptHumanChoice(prompt string) string {
 }
 
 func (game *CheckersGame) GetHumanInput() (int, int, constants.Move) {
-	inpt := game.promptHumanChoice("Piece Row Index (0-7)")
-	rIdx, cnvErr := strconv.Atoi(inpt)
+	inpt := game.promptHumanChoice("Which piece you like to move? Format: rowIndex,colIndex")
+	indices := strings.Split(inpt, ",")
+	if len(indices) <= 1 {
+		fmt.Println("Must use a ',' to separate the row and column index")
+	}
+
+	rIdx, cnvErr := strconv.Atoi(indices[0])
 	if cnvErr != nil {
 		fmt.Println(cnvErr)
 	}
 
-	inpt = game.promptHumanChoice("Piece Col Index (0-7)")
-	cIdx, cnvErr := strconv.Atoi(inpt)
+	cIdx, cnvErr := strconv.Atoi(indices[1])
 	if cnvErr != nil {
 		fmt.Println(cnvErr)
 	}
