@@ -1,7 +1,7 @@
 package board
 
 import (
-	"checkers-go/constants"
+	"github.com/miwest929/checkers-go/constants"
 	"strconv"
 	"strings"
 

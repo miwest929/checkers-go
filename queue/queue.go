@@ -2,7 +2,7 @@
 package queue
 
 import (
-	stree "checkers-go/statetree"
+	stree "github.com/miwest929/checkers-go/statetree"
 	"sync"
 )
 
