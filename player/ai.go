@@ -1,10 +1,10 @@
 package player
 
 import (
-	brd "checkers-go/board"
-	"checkers-go/constants"
-	"checkers-go/queue"
-	stree "checkers-go/statetree"
+	brd "github.com/miwest929/checkers-go/board"
+	"github.com/miwest929/checkers-go/constants"
+	"github.com/miwest929/checkers-go/queue"
+	stree "github.com/miwest929/checkers-go/statetree"
 	"fmt"
 	"math"
 	"time"

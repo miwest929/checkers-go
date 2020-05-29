@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
-	"checkers-go/board"
-	"checkers-go/constants"
-	"checkers-go/player"
+	"github.com/miwest929/checkers-go/board"
+	"github.com/miwest929/checkers-go/constants"
+	"github.com/miwest929/checkers-go/player"
 	"fmt"
 	"os"
 	"strconv"

@@ -1,8 +1,8 @@
 package statetree
 
 import (
-	brd "checkers-go/board"
-	"checkers-go/constants"
+	brd "github.com/miwest929/checkers-go/board"
+	"github.com/miwest929/checkers-go/constants"
 )
 
 type Node struct {
